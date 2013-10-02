@@ -4,9 +4,15 @@ gimbaled compass in pure HTML5
   (c) 2013  by Volker Kinkelin
   www.owntrack.net
   contact: grundguetiger at gmail fullstop com
+  latest version: https://github.com/grundguetiger/compass
   
   V 0.1 01.10.2013 initial release
-  
+  V 0.2 02.10.2013
+	-    new: add #custom to address for a customized display
+	     new: support for #debug
+     update: comments, beautified code
+     update: snappier response
+	  
 -->
 <html><head>
 <title>compass, gimbaled</title>
@@ -38,41 +44,54 @@ div.compass {
 <script type="text/javascript">
 
 window.onload = function () {
+	 
+	if( !/custom/.test(window.location.hash) ) {
 
-// lazy-off-the-shelf version:
-compassify('compass');
- 
-/*
-// fully-customized version:
-var myComp = new compassify();
+		// no hash -> lazy-off-the-shelf version:
+		compassify('compass');
 
-// cardinal points' texts:
-myComp.NESW[0] = 'Nord';
-myComp.NESW[1] = 'Ost';
-myComp.NESW[2] = 'Süd';
-myComp.NESW[3] = 'West';
+	} else {
 
-// choose colors:
-myComp.colors.NESW = 'rgba(255,255,255,0.3)';
+		// with hash: fully-customized version:
+		var myComp = new compassify();
 
-// fills the corners, usually transparent
-// like 'rgba(0,0,0,0)'
-myComp.colors.background = '#008';
+		// cardinal points texts
+		myComp.NESW[0] = 'Nord';
+		myComp.NESW[1] = 'Ost';
+		myComp.NESW[2] = 'Süd';
+		myComp.NESW[3] = 'West';
 
-// the inevitable gradient:
-myComp.colors.centerIn = '#6a6';
-myComp.colors.centerOut = '#008';
+		// cardinal points colors
+		myComp.colors.NESW = 'rgba(255,255,255,0.3)';
 
-myComp.colors.ring = '#600080';
-myComp.colors.star = '#f04';
-myComp.colors.numbers = '#fff';
+		// fills the corners, usually transparent
+		// like 'rgba(0,0,0,0)'
+		myComp.colors.background = '#008';
 
-// do the painting:
-myComp.drawCompass('compass');
+		// the inevitable gradient for the center
+		myComp.colors.centerIn = '#6a6';
+		myComp.colors.centerOut = '#008';
 
-// now start updating the orientation
-myComp.startStop(true);
-*/
+		// outer ring
+		myComp.colors.ring = '#600080';
+		// inner star
+		myComp.colors.star = '#f04';
+		// degrees
+		myComp.colors.numbers = '#fff';
+
+		// do the painting
+		myComp.drawCompass('compass');
+
+		// wait at least 1sec between updates
+		myComp.minInterval = 1000;
+		
+		// take 1 second for each transition, smooth
+		myComp.transition = '1s ease';
+		
+		// start updating the orientation
+		myComp.startUpdating(true);
+		
+	}
 
 }
 </script>
