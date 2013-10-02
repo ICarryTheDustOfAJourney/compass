@@ -4,12 +4,18 @@ gimbaled compass in pure HTML5
  (c) 2013 by Volker Kinkelin
  www.owntrack.net
  contact: grundguetiger at gmail fullstop com
+ latest version: https://github.com/grundguetiger/compass
  
  you can use it for whatever you like, if this notice
  is maintained
 
  V 0.1 01.10.2013 initial release
-
+ V 0.2 02.10.2013 
+    - minor changes, code beautification
+    - optimized defaults for minInterval, transition, rotation 
+	   limit and treshold for a snappier yet smooth response
+    - optimized debug display		
+	 
 */
 
 // create a gimbaled compass
@@ -28,9 +34,10 @@ var compassify = function (divName) {
 		NESW : '#f00'
 	},
 	NESW = ['N','E','S','W'], // letters for four directions
-	inertia = '0.7s linear', // slower = smoother, less responsive display
-	minInterval = 400, // minimum time[msec] between two updates
-	datLastUpdate = 0; // timestamp of last update
+	transition = '0.4s linear', // slower = smoother, less responsive display
+	minInterval = 200, // minimum time[msec] between two updates
+	datLastUpdate = 0, // timestamp of last update
+	version = '0.2';
 
 	// provide browser-specific properties & correction functions
 	var myBrowser = function () {
@@ -123,7 +130,7 @@ var compassify = function (divName) {
 			eleCompassCont.style[myBrowser.cssPrefix + 'perspective'] = (largerDim * 2) + 'px';
 
 			// buttery movements
-			eleCompassCanvas.style[myBrowser.cssPrefix + 'transition'] = myBrowser.cssPrefix + 'transform ' + inertia;
+			eleCompassCanvas.style[myBrowser.cssPrefix + 'transition'] = myBrowser.cssPrefix + 'transform ' + transition;
 
 		}
 
@@ -145,7 +152,7 @@ var compassify = function (divName) {
 		ctx.fill();
 
 		var radFact = Math.PI / 180; // degree -> radians
-		var ringsize = width / 8; // outr ring width
+		var ringsize = width / 8; // outer ring width
 
 		// draw degree ticks
 		// functional programming here...
@@ -315,6 +322,8 @@ var compassify = function (divName) {
 
 			elemLog = document.createElement('div');
 			elemLog.setAttribute('id', 'otcomlog');
+			// stay visible even with body overvlow:hidden
+			elemLog.setAttribute('style', 'position:absolute; top:0px;');
 			document.body.appendChild(elemLog);
 
 		}
@@ -330,13 +339,13 @@ var compassify = function (divName) {
 		trueAlpha = myBrowser.correctors.alpha(deviceAlpha);
 
 		// limit rotation
-		if (Math.abs(oldTrueAlpha) > 1080)
+		if (Math.abs(oldTrueAlpha) > 1800)
 			oldTrueAlpha %= 360;
 
 		var delta = trueAlpha - oldTrueAlpha;
 
 		// busy doing nothing?
-		if (Math.abs(delta) < 0.5)
+		if (Math.abs(delta) < 1)
 			return;
 
 		if (delta > 180) {
@@ -350,9 +359,9 @@ var compassify = function (divName) {
 
 		}
 
-		// output some info
-		if (window.location.hash === '#debug') {
-			log('&alpha;:' + evt.alpha + ' ' + myBrowser.correctors.alpha(evt.alpha) +
+		// output some debug info on demand
+		if (/debug/.test(window.location.hash)) {
+			log('V' + version + ' &alpha;:' + evt.alpha + ' ' + myBrowser.correctors.alpha(evt.alpha) +
 				'<br>&beta;:' + evt.beta + ' ' + myBrowser.correctors.beta(evt.beta) +
 				'<br>&gamma;:' + evt.gamma + ' ' + myBrowser.correctors.gamma(evt.gamma) +
 				'<br>' + oldTrueAlpha + ' &delta;' + delta +
@@ -391,7 +400,7 @@ var compassify = function (divName) {
 	}
 
 	// start or stop listening to the mighty magnetometer
-	var startStop = function (blnStart) {
+	var startUpdating = function (blnStart) {
 
 		if (blnStart)
 			window.addEventListener('deviceorientation', onDeviceOrientationChange, false);
@@ -406,16 +415,18 @@ var compassify = function (divName) {
 
 	// no canvas -> here no fun
 	if (eleCompassCanvas !== null)
-		startStop(true);
+		startUpdating(true);
 
 	// publish some may be useful stuff
 	return ({
 		colors : colors,
 		NESW: NESW,
 		drawCompass : drawCompass,
-		startStop : startStop,
+		startUpdating : startUpdating,
 		eleCompassCanvas : eleCompassCanvas,
-		onDeviceOrientationChange : onDeviceOrientationChange
+		onDeviceOrientationChange : onDeviceOrientationChange,
+		minInterval: minInterval,
+		transition: transition
 	});
 
 }; // var compassify = function (divName) {
