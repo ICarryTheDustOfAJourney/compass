@@ -15,6 +15,8 @@ gimbaled compass in pure HTML5
     - optimized defaults for minInterval, transition, rotation 
 	   limit and treshold for a snappier yet smooth response
     - optimized debug display		
+ V 0.3 03.10.2013 
+	 fix: update beta, gamma when alpha has setteled
 	 
 */
 
@@ -343,10 +345,6 @@ var compassify = function (divName) {
 			oldTrueAlpha %= 360;
 
 		var delta = trueAlpha - oldTrueAlpha;
-
-		// busy doing nothing?
-		if (Math.abs(delta) < 1)
-			return;
 
 		if (delta > 180) {
 
